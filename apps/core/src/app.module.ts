@@ -166,12 +166,15 @@ import type {
   ],
 })
 export class AppModule implements NestModule {
+  // 静态方法，允许根据 `isInit` 参数动态配置模块。
   static register(isInit: boolean): DynamicModule {
+    // 如果 isInit 为 true，则导入 InitModule
     return {
       module: AppModule,
       imports: [!isInit && InitModule].filter(Boolean) as Type<NestModule>[],
     }
   }
+  // 为所有路由配置 RequestContextMiddleware 中间件
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(RequestContextMiddleware).forRoutes('(.*)')
   }

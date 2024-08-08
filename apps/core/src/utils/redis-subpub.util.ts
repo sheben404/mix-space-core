@@ -1,16 +1,21 @@
-import IORedis from 'ioredis'
-
 import { Logger } from '@nestjs/common'
+
+import IORedis from 'ioredis'
 
 import { REDIS } from '~/app.config'
 
 import { isTest } from '../global/env.global'
 import type { Redis, RedisOptions } from 'ioredis'
 
+/**
+ * 这个类是用于发布和订阅 Redis 事件的工具类，它使用了 ioredis 库来实现 Redis 的发布和订阅功能。
+ * 它支持在 NestJS 中使用 Redis 作为事件总线，实现微服务之间的解耦和事件驱动。
+ */
 class RedisSubPub {
   public pubClient: Redis
   public subClient: Redis
   constructor(private channelPrefix: string = 'mx-channel#') {
+    // 如果不是测试环境，则初始化 Redis 客户端
     if (!isTest) {
       this.init()
     } else {
@@ -28,7 +33,9 @@ class RedisSubPub {
       redisOptions.password = REDIS.password
     }
 
+    // 创建发布客户端和订阅客户端
     const pubClient = new IORedis(redisOptions)
+    // 创建一个订阅客户端，它是发布客户端的复制品
     const subClient = pubClient.duplicate()
     this.pubClient = pubClient
     this.subClient = subClient

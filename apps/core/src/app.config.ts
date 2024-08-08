@@ -9,8 +9,10 @@ import { isDebugMode, isDev } from './global/env.global'
 import { parseBooleanishValue } from './utils'
 import type { AxiosRequestConfig } from 'axios'
 
+// 从环境变量中获取 PORT、ALLOWED_ORIGINS 和 MX_ENCRYPT_KEY
 const { PORT: ENV_PORT, ALLOWED_ORIGINS, MX_ENCRYPT_KEY } = process.env
 
+// 使用 commander 库获取命令行参数
 const commander = program
   .option('-p, --port <number>', 'server port', ENV_PORT)
   .option('--demo', 'enable demo mode')
@@ -88,13 +90,22 @@ commander.parse()
 
 const argv = commander.opts()
 
+// 如果有配置文件，则加载配置文件
 if (argv.config) {
+  // yamlLoad 是 js-yaml 库的函数，用于解析 YAML 文件
   const config = yamlLoad(
+    // 读取的路径是当前工作目录下的 argv.config 指定的文件
+    // argv.config 是命令行参数中指定的配置文件路径，一个完整的命令行示例是：
+    // npm run start -- --config=config.yaml
+    // 为什么 start 后面有两个 -- 呢？
+    // 这是因为 npm run start 命令会将 -- 后面的参数作为命令行参数传递给 start 命令，
     readFileSync(path.join(String(process.cwd()), argv.config), 'utf8'),
   )
+  // 将解析的配置文件合并到 argv 对象中，这样就可以在后续的代码中使用 argv 对象来访问配置文件中的配置了
   Object.assign(argv, config)
 }
 
+// 注意，下面的配置都是直接写的 js 对象，这意味着当有其他文件引用 app.config.js 这个文件时，这里的定义的 js 代码会直接被执行
 export const PORT = argv.port || 2333
 export const API_VERSION = 2
 
@@ -189,6 +200,7 @@ export const ENCRYPT = {
   algorithm: argv.encrypt_algorithm || 'aes-256-ecb',
 }
 
+// 因为这里所有的代码都是直接执行的，所以有其他文件引用这个文件时，这里的代码也会直接执行
 if (ENCRYPT.enable && (!ENCRYPT.key || ENCRYPT.key.length !== 64))
   throw new Error(
     `你开启了 Key 加密（MX_ENCRYPT_KEY or --encrypt_key），但是 Key 的长度不为 64，当前：${ENCRYPT.key.length}`,

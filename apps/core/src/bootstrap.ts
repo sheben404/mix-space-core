@@ -1,9 +1,9 @@
 import cluster from 'node:cluster'
 import { performance } from 'node:perf_hooks'
 import { Logger } from '@innei/pretty-logger-nestjs'
-import wcmatch from 'wildcard-match'
-
 import { NestFactory } from '@nestjs/core'
+
+import wcmatch from 'wildcard-match'
 
 import { CROSS_DOMAIN, DEBUG_MODE, PORT } from './app.config'
 import { AppModule } from './app.module'
@@ -16,8 +16,8 @@ import { logger } from './global/consola.global'
 import { isMainProcess, isTest } from './global/env.global'
 import { migrateDatabase } from './migration/migrate'
 import { checkInit } from './utils/check-init.util'
-import type { NestFastifyApplication } from '@nestjs/platform-fastify'
 import type { LogLevel } from '@nestjs/common'
+import type { NestFastifyApplication } from '@nestjs/platform-fastify'
 
 const Origin: false | string[] = Array.isArray(CROSS_DOMAIN.allowedOrigins)
   ? [...CROSS_DOMAIN.allowedOrigins, '*.shizuri.net', '22333322.xyz']
@@ -26,6 +26,10 @@ const Origin: false | string[] = Array.isArray(CROSS_DOMAIN.allowedOrigins)
 declare const module: any
 
 export async function bootstrap() {
+  // 如果当前进程是主进程，则执行数据库迁移
+  // 数据库迁移是将数据库从旧版本迁移到新版本的过程，通常用于更新数据库结构，修复数据库中的错误，优化数据库性能，以及其他一些操作。
+  // 。。为什么当前是主进程才进行数据库迁移操作？
+  // 因为主进程是启动服务的进程，如果在启动服务之前进行数据库迁移，可能会导致启动服务失败，因为数据库迁移需要在启动服务之后才能进行。
   if (isMainProcess) {
     await migrateDatabase()
   }
@@ -74,10 +78,13 @@ export async function bootstrap() {
 
   app.useGlobalPipes(ExtendedValidationPipe.shared)
   app.useGlobalGuards(new SpiderGuard())
+  // 如果不是测试环境，webSocketAdapter 使用 RedisIoAdapter 适配器
   !isTest && app.useWebSocketAdapter(new RedisIoAdapter(app))
 
   await app.listen(+PORT, '0.0.0.0', async () => {
+    // 使用 NestJS 的日志器
     app.useLogger(app.get(Logger))
+    // 打印当前环境
     logger.info('ENV:', process.env.NODE_ENV)
     const url = await app.getUrl()
     const pid = process.pid
@@ -98,6 +105,7 @@ export async function bootstrap() {
   })
 
   if (module.hot) {
+    // 如果模块热更新，则接受热更新
     module.hot.accept()
     module.hot.dispose(() => app.close())
   }

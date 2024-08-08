@@ -8,11 +8,12 @@ import { ForbiddenException, Injectable } from '@nestjs/common'
 
 import { isDev } from '~/global/env.global'
 import { getNestExecutionContextRequest } from '~/transformers/get-req.transformer'
-import type { Observable } from 'rxjs'
 import type { CanActivate, ExecutionContext } from '@nestjs/common'
+import type { Observable } from 'rxjs'
 
 @Injectable()
 export class SpiderGuard implements CanActivate {
+  // 实现 canActivate 方法，用于判断是否允许访问
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -23,6 +24,7 @@ export class SpiderGuard implements CanActivate {
     const request = this.getRequest(context)
     const headers = request.headers
     const ua: string = headers['user-agent'] || ''
+    // 判断是否是爬虫UA
     const isSpiderUA =
       !!/(scrapy|httpclient|axios|python|requests)/i.test(ua) &&
       !/(mx-space|rss|google|baidu|bing)/gi.test(ua)

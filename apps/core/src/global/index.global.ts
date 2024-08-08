@@ -1,8 +1,9 @@
-/* eslint-disable import/order */
 import cluster from 'node:cluster'
 import { mkdirSync } from 'node:fs'
 
 import { Logger } from '@nestjs/common'
+
+import { CLUSTER } from '~/app.config'
 
 import {
   DATA_DIR,
@@ -14,14 +15,12 @@ import {
 } from '~/constants/path.constant'
 
 import { consola, logger } from './consola.global'
+import { cwd, isDev } from './env.global'
+
+import { registerJSONGlobal } from './json.global'
 
 import './dayjs.global'
 import '@mx-space/external/zx-global'
-
-import { CLUSTER } from '~/app.config'
-
-import { cwd, isDev } from './env.global'
-import { registerJSONGlobal } from './json.global'
 
 // 建立目录
 function mkdirs() {
@@ -43,6 +42,9 @@ function mkdirs() {
   }
 }
 
+// 注册全局变量
+// 全局变量是全局可访问的变量，它可以在任何地方被访问和修改
+// globalThis 是全局对象，它是全局可访问的对象，它可以在任何地方被访问和修改
 function registerGlobal() {
   $.verbose = isDev
   Object.assign(globalThis, {
@@ -62,6 +64,12 @@ function nodeEnvInjection() {
   // # ncc not support runtime require so disable ACCELERATION
   process.env.CBOR_NATIVE_ACCELERATION_DISABLED = 'true'
 }
+
+// 这里 register 做了什么？
+// 1. 注册全局变量
+// 2. 注册全局函数
+// 3. 注册全局对象
+// 4. 注册全局类
 
 export function register() {
   registerGlobal()
