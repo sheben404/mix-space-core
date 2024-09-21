@@ -52,4 +52,5 @@ bin/process-reporter
 dist
 dev/
 
+mx-server-core
 mx-server-core.zip

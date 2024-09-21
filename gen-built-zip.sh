@@ -1,15 +1,9 @@
 #!/bin/sh
 set -e
-rm -rf out
-rm -rf assets/.git
-# Copy core/out to $root/out
-cp -r ./apps/core/out ./out
+rm -rf mx-server-core
+mkdir mx-server-core
+cp -r ./apps/core/out ./mx-server-core/out
 
-cp -R assets out
-# Copy core ecosystem.config.js to $root/out
-cp ./apps/core/ecosystem.config.js out
-node ./apps/core/download-latest-admin-assets.js
-cd out
-zip -r ../mx-server-core.zip ./*
-
-rm -rf out
+# Copy core ecosystem.config.js to $root/mx-server-core
+cp ./apps/core/ecosystem.config.js mx-server-core
+zip -r ./mx-server-core.zip mx-server-core
