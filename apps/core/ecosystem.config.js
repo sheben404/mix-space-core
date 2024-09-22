@@ -13,8 +13,9 @@ module.exports = {
       max_memory_restart: '520M',
       args: '',
       env: {
-        PORT: '3000',
-        ALLOWED_ORIGINS: 'sheben404.com,www.sheben404.com',
+        PORT: '2333',
+        ALLOWED_ORIGINS:
+          'sheben404.com,www.sheben404.com,localhost:*,127.0.0.1',
       },
     },
   ],
